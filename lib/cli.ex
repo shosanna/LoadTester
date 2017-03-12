@@ -15,13 +15,17 @@ defmodule LoadTester.CLI do
   end
 
   defp parse_args(args) do
-    OptionParser.parse(args, aliases: [n: :requests], strict: [requests: :integer])
+    OptionParser.parse(args, aliases: [n: :requests],
+                              strict: [requests: :integer])
   end
 
   defp process_options(options, nodes) do
     case options do
-      {[requests: n], [url], []} -> do_requests(n, url, nodes)
-      _ -> do_help()
+      {[requests: n], [url], []} ->
+        do_requests(n, url, nodes)
+
+      _ ->
+        do_help()
     end
   end
 
@@ -49,7 +53,7 @@ defmodule LoadTester.CLI do
     Node.list
       |> Enum.flat_map(fn node ->
         1..req_per_node |> Enum.map(fn _ -> 
-          Task.Supervisor.async({LoadTester.TasksSupervisor, node}, LoadTester.Worker, :start, [url]) end
+          Task.Supervisor.async({TasksSupervisor, node}, LoadTester.Worker, :start, [url]) end
         ) end
       )
       |> Enum.map(fn x -> Task.await(x, :infinity) end)
